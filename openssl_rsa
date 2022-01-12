@@ -1,0 +1,79 @@
+Task 1. Create the encryption key
+
+In this task, you create a 256 bit (32 byte) random number to use as a key.
+
+Important: When using customer-supplied encryption keys, it is up to you to generate and manage your encryption keys. You must provide Compute Engine a key that is a 256-bit string encoded in RFC 4648 standard base64. For this lab, you will just generate a key with a random number.
+
+On the Google Cloud Console title bar, click Activate Cloud Shell (Description: cloud_shell_icon.png). If prompted, click Continue.
+Enter the following single command in Cloud Shell to create a 256 bit (32 byte) random number to use as a key:
+openssl rand 32 > mykey.txt
+
+Se copió correctamente
+
+content_copy
+
+View the mykey.txt to verify the key was created:
+more mykey.txt
+
+Se copió correctamente
+
+content_copy
+
+Task 2. Protect your new key with RSA key wrapping
+
+In this task, you protect your key with RSA key wrapping.
+
+Important: You can optionally wrap your key using an RSA public key certificate provided by Google, and then use that wrapped key in your requests. In this section you will wrap the key just created. This is a recommended best practice.
+
+RSA key wrapping is a process in which you use a public key to encrypt your data. After that data has been encrypted with the public key, it can only be decrypted by the respective private key. In this case, the private key is known only to Google Cloud services. By wrapping your key using the RSA certificate, you ensure that only Google Cloud services can unwrap your key and use it to protect your data.
+
+Note: The following steps will use openssl to wrap your key. There are many ways to RSA-wrap keys and you can alternatively use a method that is familiar to you.
+
+From the Cloud Shell command prompt, use the following command to download the Compute Engine public certificate:
+curl \
+
+https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem \
+
+> gce-cert.pem
+
+Se copió correctamente
+
+content_copy
+
+Extract the public key from the certificate with the following command:
+openssl x509 -pubkey -noout -in gce-cert.pem > pubkey.pem
+
+Se copió correctamente
+
+content_copy
+
+RSA-wrap your key with the following command:
+openssl rsautl -oaep -encrypt -pubin -inkey pubkey.pem -in \
+
+mykey.txt -out rsawrappedkey.txt
+
+Se copió correctamente
+
+content_copy
+
+The key must now be encoded in base64 before it can be used.
+
+Encode your RSA-wrapped key in base64:
+openssl enc -base64 -in rsawrappedkey.txt | tr -d '\n' | sed -e \
+
+'$a\' > rsawrapencodedkey.txt
+
+Se copió correctamente
+
+content_copy
+
+View your encoded, wrapped key to verify it was created:
+cat rsawrapencodedkey.txt
+
+Se copió correctamente
+
+content_copy
+
+Example output (Do not copy)
+
+c0NSz0/t2THGdPfsS0sDokR8KIioUNLoJLR/HvP/XCsbBNoQjyUKrm9th/kAYCsIdLU/A/rS4W2wUXpmoSqi4Lf8HQqaP3zfuH6xH2UklxGZ04LhpmtRdG9zC81Hpzkw+NnOSIslO9rLtvVaX8qaPsSnSM7YgfTYCzB4ESuMlc3xMzBD6B2LxXyDRSw6muNdz3Kpp5YhBA41Zz4ljrkzcOse38dLEY3Q7Y+zjK/+H4P6PO3vllUFjgeZWgIFNcad4KU69Bb3m5cYM1eOpxm7WRsuMNuN7/gZj1aLXL+tvsJVwrzjPHQFDajf7jgotu0YiZNs07Yw3UrHZFKIWhYNrw==
