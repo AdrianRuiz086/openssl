@@ -21,3 +21,7 @@ transfer_config = transfer_client.create_transfer_config(
     transfer_config=transfer_config,
 )
 print(f"Created transfer config: {transfer_config.name}")
+
+
+#####
+bq mk --transfer_config --project_id=[PROJECT_ID] --data_source=[DATA_SOURCE] --target_dataset=[DATASET] --display_name=[NAME] --params='[PARAMETERS]'
